@@ -1,66 +1,219 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="320" alt="Laravel Logo">
 </p>
 
-## About Laravel
+# Smart LMS API
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+A production-grade Learning Management System API built with Laravel 10, JWT authentication, and a Filament-based admin panel. It provides user auth, role-based access, course/enrollment foundations, and a customizable dashboard with live statistics.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Table of Contents
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Overview
+- Tech Stack
+- Project Structure
+- Getting Started
+- Environment & Configuration
+- Database & Migrations
+- Authentication (JWT)
+- API Endpoints (v1)
+- Postman Collection
+- Admin Panel (Filament)
+- Custom Dashboard Widget
+- Common Commands
+- Troubleshooting
+- What We Implemented
 
-## Learning Laravel
+## Overview
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Smart LMS API powers modern educational platforms with secure authentication, clean REST APIs, and a convenient admin UI. It’s designed for scalability and clarity, following Laravel best practices with Eloquent relationships, form request validation, and consistent API responses.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Laravel 10 (PHP 8.2)
+- MySQL
+- JWT Auth: `tymon/jwt-auth`
+- Admin Panel: Filament v3
+- Caching/Queues: Laravel defaults (extendable)
 
-## Laravel Sponsors
+## Project Structure
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- `routes/api.php` → API v1 routing and grouping
+- `app/Http/Controllers/Api/V1` → Versioned API controllers
+- `app/Http/Requests/Api/V1` → Form Requests (validation)
+- `app/Models` → Eloquent models (Users, Courses, Enrollments, ...)
+- `app/Http/Middleware/JwtAuthMiddleware.php` → JWT guard + error handling
+- `app/Filament/Widgets/LMSStatsWidget.php` → Custom dashboard metrics
+- `postman/Smart-LMS-API.postman_collection.json` → API tests/examples
 
-### Premium Partners
+## Getting Started
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+1) Clone and install
 
-## Contributing
+```bash
+git clone <repo-url>
+cd Smart-LMS-Api
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2) Configure database in `.env`
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=smart_lms_api
+DB_USERNAME=root
+DB_PASSWORD=secret
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+3) JWT setup
 
-## Security Vulnerabilities
+```bash
+php artisan jwt:secret
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4) Migrate
 
-## License
+```bash
+php artisan migrate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5) Serve (example)
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+```
+
+## Environment & Configuration
+
+- `config/auth.php` includes an `api` guard using `jwt`.
+- Email validation is environment-aware: `email:rfc` locally, `email:rfc,dns` in production.
+- Middleware alias `jwt.auth` applies JWT verification and user status checks (`active`, `suspended`, `inactive`).
+
+## Database & Migrations
+
+Key changes implemented:
+
+- Users table aligned with LMS needs: `first_name`, `last_name`, `phone`, `avatar_url`, `role` (student|instructor|admin), `status` (active|suspended|inactive), `last_login_at`.
+- Backfill from legacy `name` → split into first/last names; drop legacy column.
+- `user_profiles` supports `preferences` and `social_links` (JSON) with proper `$fillable` and `$casts`.
+
+Models updated with relationships and safe mass assignment (`$fillable`). Notable:
+
+- `User` implements `JWTSubject` and `FilamentUser` (restricts panel to admins), plus `getNameAttribute()`.
+- `Course`, `Category`, `Section`, `Enrollment` relationships established.
+
+## Authentication (JWT)
+
+Public endpoints:
+
+- POST `/api/v1/auth/register`
+- POST `/api/v1/auth/login`
+
+Protected (uses `jwt.auth`):
+
+- GET `/api/v1/auth/me`
+- POST `/api/v1/auth/logout`
+- POST `/api/v1/auth/refresh`
+
+Responses are standardized via `BaseApiController`.
+
+## API Endpoints (v1)
+
+Auth group sample (see `routes/api/v1/auth.php`):
+
+```text
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+GET    /api/v1/auth/me           (jwt)
+POST   /api/v1/auth/logout       (jwt)
+POST   /api/v1/auth/refresh      (jwt)
+```
+
+Users/Courses are scaffolded for admin via Filament; public CRUD APIs will be extended in subsequent phases.
+
+## Postman Collection
+
+Use the included collection:
+
+- Import `postman/Smart-LMS-API.postman_collection.json`
+- Collection includes Register/Login/Me/Logout/Refresh with pre-request helpers.
+
+## Admin Panel (Filament)
+
+- Admin-only access via `User::canAccessPanel()` checking `role === 'admin'`.
+- Navigate to `/admin` and login as an admin user.
+- Known requirement: PHP `intl` extension for certain numeric formatting. If missing, dashboard still works; some list views may fail with `Class "NumberFormatter" not found`.
+
+Enable `intl` on Windows (php.ini):
+
+```ini
+; Uncomment or add
+extension=intl
+```
+
+Restart PHP/serve after enabling.
+
+## Custom Dashboard Widget
+
+`app/Filament/Widgets/LMSStatsWidget.php` shows live metrics:
+
+- Total Users, Students, Instructors
+- Total Courses, Categories
+- Total/Active Enrollments, Completed Courses
+
+These values update as you add data via API or tinker.
+
+## Common Commands
+
+Add users via tinker (PowerShell-safe):
+
+```powershell
+php artisan tinker --execute="App\Models\User::create(['first_name'=>'John','last_name'=>'Doe','email'=>'john.doe@example.com','password'=>bcrypt('Password123!'),'role'=>'student','status'=>'active']); echo 'User created';"
+```
+
+Counts:
+
+```powershell
+php artisan tinker --execute="echo 'Users: ' . App\Models\User::count();"
+php artisan tinker --execute="echo 'Students: ' . App\Models\User::where('role','student')->count();"
+```
+
+Enrollment lifecycle:
+
+```powershell
+php artisan tinker --execute='$s=App\Models\User::where("role","student")->first(); $c=App\Models\Course::first(); App\Models\Enrollment::create(["course_id"=>$c->id,"student_id"=>$s->id,"status"=>"active","amount_paid"=>99.99]); echo "Enrollment created";'
+php artisan tinker --execute='$e=App\Models\Enrollment::latest()->first(); $e->update(["status"=>"completed"]); echo "Enrollment updated";'
+php artisan tinker --execute='App\Models\Enrollment::latest()->first()?->delete(); echo "Enrollment deleted";'
+```
+
+## Troubleshooting
+
+- Could not open input file: artisan → Ensure you are in the project root: `cd Smart-LMS-Api`.
+- PowerShell quoting errors → Use single-quoted `--execute` and double quotes inside PHP.
+- 422 on register → Check validation errors (password strength, unique email). Use try/catch in PowerShell to print JSON.
+- `Class "NumberFormatter" not found` → Enable PHP `intl` extension or avoid `->money()` formatting in tables.
+- JWT unauthorized → Ensure `config/auth.php` has `api` guard driver `jwt`, run `php artisan jwt:secret`, and clear config cache if needed.
+
+## What We Implemented
+
+- Registration API with robust validation and profile auto-creation.
+- JWT Authentication (login/logout/refresh/me) with `jwt.auth` middleware.
+- Environment-aware email validation (`rfc` vs `rfc,dns`).
+- Database migrations aligning users schema with LMS needs.
+- Fixed mass-assignment for `UserProfile` and added JSON casts.
+- Filament admin panel accessible only to admins.
+- Custom LMS statistics dashboard widget.
+- Postman collection for Tasks 6–8.
+
+## Roadmap
+
+- Expand CRUD APIs for Courses, Enrollments, Lessons, Assignments, Quizzes.
+- Role/permission policies per endpoint.
+- Notifications, live sessions, analytics, payments.
+
+---
+
+MIT License © Smart LMS API
