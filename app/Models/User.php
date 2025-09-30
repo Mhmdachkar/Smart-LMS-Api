@@ -11,8 +11,10 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable implements JWTSubject, MustVerifyEmail
+class User extends Authenticatable implements JWTSubject, MustVerifyEmail, FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -243,5 +245,18 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     public function discussionVotes(): HasMany
     {
         return $this->hasMany(DiscussionVote::class);
+    }
+
+    /**
+     * Filament user interface methods
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }
